@@ -25,35 +25,19 @@ import java.util.UUID;
 public class UserController {
     @Autowired
     UserRepository userRepository;
-//    @Autowired
     private  final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
     ObjectMapper mapper = new ObjectMapper();
-
-    @GetMapping("/api/user")
-    String getAll() throws JsonProcessingException {
-        List<User> allusers = userRepository.findAll();
-            if (userRepository.findAll() ==null){
-                return "no one here!";
-            }else{
-                List<User> all = userRepository.findAll();
-                return mapper.writeValueAsString(all);
-            }
-    };
-
-
 
     @PostMapping("/api/user")
     public Response saveUser(@RequestBody String userjson) throws JsonProcessingException {
-//    public String saveUser(@RequestBody String userjson) throws JsonProcessingException {
         User user = new User();
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
+        ObjectMapper mapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,false);
         try {
             user  = mapper.readValue(userjson,User.class);
         } catch (IOException e) {
             e.printStackTrace();
-            String value = mapper.writeValueAsString("Its was hard, but you did that. its all gone wrong!");
+            String value = mapper.writeValueAsString("It's wrong input data");
             return Response.status(400).entity(value).build();
         }
         try {
@@ -63,8 +47,8 @@ public class UserController {
                 System.out.println(user);
                 userRepository.save(user);
                 UserWithoutPass userWithoutPass =new UserWithoutPass(user);
-//                return mapper.writeValueAsString(userWithoutPass);
-                return Response.status(Response.Status.OK).entity(userWithoutPass).build();
+                return Response.accepted().entity(userWithoutPass).build();
+
 
             } else throw new UserAlreadyExistsExeption(user.getUserName());
         } catch (UserAlreadyExistsExeption userAlreadyExistsExeption) {
@@ -72,12 +56,24 @@ public class UserController {
             String errData =
                     "{\"code\":\"USER_ALREADY_EXISTS\","+
                             "\"description\":\"A user with the given username already exists\" } ";
+
             String errJson = mapper.writeValueAsString(errData);
-            return Response.status(Response.Status.CONFLICT).entity(errJson).build();
+            return Response.status(409).entity(errJson).build();
 
         }
 
     }
+
+    @GetMapping("/api/user")
+    String getAll() throws JsonProcessingException {
+        List<User> allusers = userRepository.findAll();
+        if (userRepository.findAll() ==null){
+            return "no one here!";
+        }else{
+            List<User> all = userRepository.findAll();
+            return mapper.writeValueAsString(all);
+        }
+    };
 
 
 }
