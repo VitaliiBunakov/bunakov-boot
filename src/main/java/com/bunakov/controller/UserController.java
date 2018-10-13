@@ -44,7 +44,7 @@ public class UserController {
 
 
     @PostMapping("/api/user")
-    public String saveUser(@RequestBody String userjson) throws JsonProcessingException {
+    public Response saveUser(@RequestBody String userjson) throws JsonProcessingException {
 //    public String saveUser(@RequestBody String userjson) throws JsonProcessingException {
         User user = new User();
         ObjectMapper mapper = new ObjectMapper();
@@ -53,7 +53,8 @@ public class UserController {
             user  = mapper.readValue(userjson,User.class);
         } catch (IOException e) {
             e.printStackTrace();
-            return "Its was hard, but you did that. its all gone wrong!";
+            String value = mapper.writeValueAsString("Its was hard, but you did that. its all gone wrong!");
+            return Response.status(400).entity(value).build();
         }
         try {
             if (!(user.getUserName().equals("")) & !userRepository.existsByUserName(user.getUserName())) {
@@ -62,7 +63,8 @@ public class UserController {
                 System.out.println(user);
                 userRepository.save(user);
                 UserWithoutPass userWithoutPass =new UserWithoutPass(user);
-                return mapper.writeValueAsString(userWithoutPass);
+//                return mapper.writeValueAsString(userWithoutPass);
+                return Response.status(Response.Status.OK).entity(userWithoutPass).build();
 
             } else throw new UserAlreadyExistsExeption(user.getUserName());
         } catch (UserAlreadyExistsExeption userAlreadyExistsExeption) {
@@ -73,7 +75,6 @@ public class UserController {
             String errJson = mapper.writeValueAsString(errData);
             return Response.status(Response.Status.CONFLICT).entity(errJson).build();
 
-            return "fuck!  ";
         }
 
     }
