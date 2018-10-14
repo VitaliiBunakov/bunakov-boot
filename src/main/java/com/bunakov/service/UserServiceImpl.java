@@ -1,5 +1,6 @@
 package com.bunakov.service;
 
+import com.bunakov.exeptions.UserAlreadyExistsExeption;
 import com.bunakov.model.User;
 import com.bunakov.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,13 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public void save(User user) {
-        userRepository.save(user);
-
+    public User createUser(User user) throws UserAlreadyExistsExeption {
+        if (!userRepository.existsByUserName(user.getUserName())) {
+            userRepository.save(user);
+            return user;
+        } else {
+            throw new UserAlreadyExistsExeption(user.getUserName());
+        }
     }
 
     @Override
