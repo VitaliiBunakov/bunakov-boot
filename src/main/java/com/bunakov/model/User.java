@@ -9,18 +9,16 @@ import javax.persistence.Id;
 import java.util.Objects;
 
 @Entity
-//@Table(name = "user")
 public class User {
 
     @Id
-
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private String id;
-
     private String firstName;
     private String lastName;
+
     @Column(unique = true,nullable = false)
     private String userName;
+
     @JsonProperty("password")
     private String plainTextPassword;
     private String hashedPassword;
@@ -48,6 +46,15 @@ public class User {
                 Objects.equals(userName, user.userName) &&
                 Objects.equals(plainTextPassword, user.plainTextPassword) &&
                 Objects.equals(hashedPassword, user.hashedPassword);
+    }
+
+    public User(String id, String firstName, String lastName, String userName, String plainTextPassword, String hashedPassword) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.userName = userName;
+        this.plainTextPassword = plainTextPassword;
+        this.hashedPassword = hashedPassword;
     }
 
     @Override

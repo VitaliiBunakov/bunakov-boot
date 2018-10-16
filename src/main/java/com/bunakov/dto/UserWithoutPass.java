@@ -1,9 +1,9 @@
 package com.bunakov.dto;
 
 import com.bunakov.model.User;
-
+//i decided that more correctly in DTO just don't accept pass  than do  smth like that
 //@JsonIgnoreProperties(ignoreUnknown = true, value = {"plainTextPassword,hashedPassword"})
-public class UserWithoutPass  {
+public class UserWithoutPass {
     private String id;
     private String firstName;
     private String lastName;

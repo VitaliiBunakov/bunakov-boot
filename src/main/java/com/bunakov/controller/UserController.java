@@ -26,47 +26,62 @@ import java.util.UUID;
 @RestController
 public class UserController {
     @Autowired
-    UserServiceImpl userRepository;
-    private  final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    private ObjectMapper mapper = new ObjectMapper();
+    UserServiceImpl userRepository; //DAO
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); //for hash pass
+    private ObjectMapper mapper = new ObjectMapper(); //json pars
+
 
     @PostMapping("/api/user")
-    public ResponseEntity<String> saveU(@RequestBody String userinp) throws IOException {
+    public ResponseEntity<String> saveU(@RequestBody String userinp) throws IOException {//ResponseEntty to rule http headers and status
 
+        //user:  json-> USer
         User user = mapper.readValue(userinp, User.class);
+        //chek pass and username is not missing
         if (!(user.getUserName().isEmpty()) & !(user.getPlainTextPassword().isEmpty())) {
+            //hash pass and ID generatoin
             user.setHashedPassword(passwordEncoder.encode(user.getPlainTextPassword()));
             user.setId(UUID.randomUUID().toString());
             System.out.println(user);
+            //try to create user
             try {
                 User serviceUser = userRepository.createUser(user);
+                //preparing user to return it to front
                 UserWithoutPass userWithoutPass = new UserWithoutPass(serviceUser);
                 String uWPJson = mapper.writeValueAsString(userWithoutPass);
+
                 return new ResponseEntity<String>(uWPJson, HttpStatus.OK);
 
+                //if we can't create user in some reason
             } catch (UserAlreadyExistsExeption userAlreadyExistsExeption) {
+                //sout exeptoin
                 userAlreadyExistsExeption.printStackTrace();
-                Map<String,String > errResponseBody = new HashMap<>();
-                errResponseBody.put("code","USER_ALREADY_EXISTS");
+                //prepearing error response body
+                Map<String, String> errResponseBody = new HashMap<>();
+                errResponseBody.put("code", "USER_ALREADY_EXISTS");
                 errResponseBody.put("description", "A user with the given username already exists");
                 String jERBody = mapper.writeValueAsString(errResponseBody);
-                return new ResponseEntity<String>( jERBody,HttpStatus.CONFLICT);
+
+                return new ResponseEntity<String>(jERBody, HttpStatus.CONFLICT);
             }
         }
+        //return bad request if incoming data is basicly inorrect
         return new ResponseEntity<String>("User data is unreadable!", HttpStatus.BAD_REQUEST);
 
     }
 
+    //just for usability method
     @GetMapping("/api/user")
     String getAll() throws JsonProcessingException {
         List<User> allusers = userRepository.findAll();
-        if (userRepository.findAll() ==null){
+        if (userRepository.findAll() == null) {
             return "no one here!";
-        }else{
+        } else {
             List<User> all = userRepository.findAll();
             return mapper.writeValueAsString(all);
         }
-    };
+    }
+
+
 
 
 }
