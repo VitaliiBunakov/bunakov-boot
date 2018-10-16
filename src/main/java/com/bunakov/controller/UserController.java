@@ -5,6 +5,7 @@ import com.bunakov.exeptions.UserAlreadyExistsExeption;
 import com.bunakov.model.User;
 import com.bunakov.service.UserServiceImpl;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,8 @@ public class UserController {
     @Autowired
     UserServiceImpl userRepository; //DAO
     private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(); //for hash pass
-    private ObjectMapper mapper = new ObjectMapper(); //json pars
+    private ObjectMapper mapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); //json pars
 
 
     @PostMapping("/api/user")
